@@ -2,33 +2,24 @@ import type { NextPage } from 'next';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import { getActivePublicKey } from 'sss-module';
-import { apiClient } from 'src/shared/lib/apiClient';
-import { SellTransaction, BuyTransaction } from 'src/shared/types';
+import sym from '../shared/lib/symbol';
 
 const Home: NextPage = () => {
   const CreateSellTransaction = async () => {
-    const data: SellTransaction = {
-      sellerPublicKey: getActivePublicKey(),
-      buyMosaicId: '65DBB4CC472A5734',
-      buyMosaicAmount: 1,
-      sellMosaicId: '3A8416DB2D53B6C8',
-      sellMosaicAmount: 1,
-    };
-    const response = await apiClient.post<SellTransaction>(
-      '/api/create-sell-transaction',
-      data,
+    const response = await sym.createSellTransaction(
+      getActivePublicKey(),
+      '65DBB4CC472A5734',
+      1,
+      '3A8416DB2D53B6C8',
+      1,
     );
     console.log(response);
   };
   const CreateBuyTransaction = async () => {
-    const data: BuyTransaction = {
-      hash: '36F096ECDCB0CB3A5B094814ED3379314FD1EAABA435CB1D2C8CA9C867CB19FE',
-    };
-    const response = await apiClient.post<BuyTransaction>(
-      '/api/create-buy-transaction',
-      data,
-    );
-    console.log(response);
+    const hash =
+      'D17352FBE0F8ECF62B0E2A47C2C8CF172E9BC909B52AF590E2D135B517CABB82';
+    const result = await sym.createBuyTransaction(hash, getActivePublicKey());
+    console.log(result);
   };
   return (
     <Box>

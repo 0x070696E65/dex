@@ -1,7 +1,6 @@
 import { Controller, Get, Render, Body, Post } from '@nestjs/common';
 import { AppService } from './app.service';
-import type { SellTransaction, BuyTransaction } from '../shared/types';
-
+import { BuyTransaction, AggTransaction } from '../shared/types';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
@@ -12,11 +11,14 @@ export class AppController {
     return {};
   }
 
-  @Post('/api/create-sell-transaction')
-  public async createSellTransaction(@Body() sellTransaction: SellTransaction) {
+  @Post('/api/create-aggregate-buy-transaction')
+  public async createAggregateBuyTransaction(
+    @Body() aggTransaction: AggTransaction,
+  ) {
     try {
-      const result = await this.appService.createSellTransaction(
-        sellTransaction,
+      const result = await this.appService.createAggregateBuyTransaction(
+        aggTransaction.hash,
+        aggTransaction.publicKey,
       );
       return result;
     } catch (e: any) {
@@ -24,10 +26,14 @@ export class AppController {
     }
   }
 
-  @Post('/api/create-buy-transaction')
-  public async createBuyTransaction(@Body() hash: string) {
+  @Post('/api/create-cosignature-transaction')
+  public async createCosignatureTransaction(
+    @Body() buyTransaction: BuyTransaction,
+  ) {
     try {
-      const result = await this.appService.createBuyTransaction(hash);
+      const result = await this.appService.createCosignatureTransaction(
+        buyTransaction.payload,
+      );
       return result;
     } catch (e: any) {
       throw new Error(e.message);

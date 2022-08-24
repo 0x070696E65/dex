@@ -1,33 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { SellTransaction } from 'src/shared/types';
-import { TransactionAnnounceResponse } from 'symbol-sdk';
-import { createSellTransaction, createBuyTransaction } from './utils/symbol';
+import { AggregateTransaction, CosignatureSignedTransaction } from 'symbol-sdk';
+import {
+  createCosignatureTransaction,
+  createAggregateBuyTransaction,
+} from './utils/symbol';
 @Injectable()
 export class AppService {
-  async createSellTransaction(
-    sellTransaction: SellTransaction,
-  ): Promise<TransactionAnnounceResponse | undefined> {
-    try {
-      const result = await createSellTransaction(
-        sellTransaction.sellerPublicKey,
-        sellTransaction.buyMosaicId,
-        sellTransaction.buyMosaicAmount,
-        sellTransaction.sellMosaicId,
-        sellTransaction.sellMosaicAmount,
-      );
-      return result;
-    } catch (e) {
-      console.error(e);
-    }
+  async createCosignatureTransaction(
+    payload: string,
+  ): Promise<CosignatureSignedTransaction> {
+    return await createCosignatureTransaction(payload);
   }
-  async createBuyTransaction(
+  async createAggregateBuyTransaction(
     hash: string,
-  ): Promise<TransactionAnnounceResponse | undefined> {
-    try {
-      const result = await createBuyTransaction(hash);
-      return result;
-    } catch (e) {
-      console.error(e);
-    }
+    publicKey: string,
+  ): Promise<string> {
+    return await createAggregateBuyTransaction(hash, publicKey);
   }
 }

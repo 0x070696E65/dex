@@ -1,39 +1,29 @@
 import {
-  RepositoryFactoryHttp,
-  Crypto,
   NetworkType,
-  PublicAccount,
-  SecretLockTransaction,
+  Account,
+  CosignatureTransaction,
   Deadline,
-  Mosaic,
-  MosaicId,
-  UInt64,
-  LockHashAlgorithm,
-  TransferTransaction,
-  PlainMessage,
-  AggregateTransaction,
+  RepositoryFactoryHttp,
   TransactionGroup,
+  AggregateTransaction,
+  SecretLockTransaction,
+  TransferTransaction,
+  PublicAccount,
   EncryptedMessage,
   SecretProofTransaction,
-  Account,
+  LockHashAlgorithm,
+  PlainMessage,
+  UInt64,
+  Mosaic,
+  MosaicId,
 } from 'symbol-sdk';
-import {
-  requestSignEncription,
-  setTransaction,
-  requestSign,
-  setMessage,
-  getActivePublicKey,
-  requestSignWithCosignatories,
-} from 'sss-module';
-import { sha3_256 } from 'js-sha3';
-
+import { Order } from '../../shared/types';
+const ng = '7FCCD304802016BEBBCD342A332F91FF1F3BB5E902988B352697BE245F48E836';
+const nt = NetworkType.TEST_NET;
+const ea = 1637848847;
 const node = 'https://hideyoshi.mydns.jp:3001';
 const repo = new RepositoryFactoryHttp(node);
 const txRepo = repo.createTransactionRepository();
-const ea = 1637848847;
-const ng = '7FCCD304802016BEBBCD342A332F91FF1F3BB5E902988B352697BE245F48E836';
-const nt = NetworkType.TEST_NET;
-
 const exchangePubkey =
   '63F391849CE99ACF97DBB5388323520CC8C7E3CCB4A739FF0F699DB3FAA991D7'; //process.env.EXCHANGE_PUBKEY;
 const exchangePublicAccount = PublicAccount.createFromPublicKey(
@@ -50,85 +40,19 @@ const exchangeAccount = Account.createFromPrivateKey(
   nt,
 );
 
-export const createSellTransaction = async (
-  sellerPublicKey: string,
-  buyMosaicId: string,
-  buyMosaicAmount: number,
-  sellMosaicId: string,
-  sellMosaicAmount: number,
-) => {
-  try {
-    const random = Crypto.randomBytes(20);
-    const hash = sha3_256.create();
-    const secret = hash.update(random).hex();
-    const proof = random.toString('hex');
-
-    const order = {
-      buyMosaicId,
-      buyMosaicAmount,
-    };
-
-    const sellderPublicAccount = PublicAccount.createFromPublicKey(
-      sellerPublicKey,
-      nt,
-    );
-    const deadline = Deadline.create(ea);
-
-    const lockTx = SecretLockTransaction.create(
-      deadline,
-      new Mosaic(new MosaicId(sellMosaicId), UInt64.fromUint(sellMosaicAmount)),
-      UInt64.fromUint(10000),
-      LockHashAlgorithm.Op_Sha3_256,
-      secret,
-      exchangePublicAccount.address,
-      nt,
-    );
-
-    console.log(proof);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    setMessage(proof, exchangePubkey!);
-    const encryptedMessage = await requestSignEncription();
-
-    const proofTx = TransferTransaction.create(
-      deadline,
-      exchangePublicAccount.address,
-      [],
-      encryptedMessage,
-      nt,
-    );
-
-    const infoTx = TransferTransaction.create(
-      deadline,
-      exchangePublicAccount.address,
-      [],
-      PlainMessage.create(JSON.stringify(order)),
-      nt,
-    );
-
-    const aggTx = AggregateTransaction.createComplete(
-      deadline,
-      [
-        lockTx.toAggregate(sellderPublicAccount),
-        proofTx.toAggregate(sellderPublicAccount),
-        infoTx.toAggregate(sellderPublicAccount),
-      ],
-      nt,
-      [],
-    ).setMaxFeeForAggregate(100, 0);
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    setTransaction(aggTx);
-    const signedTransaction = await requestSign();
-    const result = await txRepo.announce(signedTransaction).toPromise();
-    if (result == undefined) throw new Error('announce failed');
-    return result;
-  } catch (e) {
-    console.error(e);
-  }
+export const createCosignatureTransaction = async (payload: string) => {
+  const signedTx = CosignatureTransaction.signTransactionPayload(
+    exchangeAccount,
+    payload,
+    ng,
+  );
+  return signedTx;
 };
 
-export const createBuyTransaction = async (hash: string) => {
+export const createAggregateBuyTransaction = async (
+  hash: string,
+  buyerPublicKey: string,
+) => {
   const deadline = Deadline.create(ea);
   const aggTx = await txRepo
     .getTransaction(hash, TransactionGroup.Confirmed)
@@ -143,7 +67,6 @@ export const createBuyTransaction = async (hash: string) => {
     sellerPublicKey,
     nt,
   );
-  const buyerPublicKey = getActivePublicKey();
   const buyerPublicAccount = PublicAccount.createFromPublicKey(
     buyerPublicKey,
     nt,
@@ -155,12 +78,11 @@ export const createBuyTransaction = async (hash: string) => {
     ).message.payload,
     exchangePublicAccount,
   );
+
   const proof = exchangeAccount.decryptMessage(
     encryptedMessage,
     sellerPublicAccount,
   ).payload;
-  console.log(secret);
-  console.log(proof);
 
   const order: Order = JSON.parse(
     (
@@ -168,7 +90,6 @@ export const createBuyTransaction = async (hash: string) => {
         .innerTransactions[2] as TransferTransaction
     ).message.payload,
   );
-  console.log(order);
 
   const proofTx = SecretProofTransaction.create(
     deadline,
@@ -187,7 +108,7 @@ export const createBuyTransaction = async (hash: string) => {
     deadline,
     sellerPublicAccount.address,
     [buyMosaic],
-    PlainMessage.create('指定したモザイクを入手しました'),
+    PlainMessage.create('売り手が手に入れるトランザクション'),
     nt,
   );
 
@@ -196,7 +117,7 @@ export const createBuyTransaction = async (hash: string) => {
     deadline,
     buyerPublicAccount.address,
     [sellMosaic],
-    PlainMessage.create('指定したモザイクを入手しました'),
+    PlainMessage.create('買い手が手に入れるトランザクション'),
     nt,
   );
 
@@ -210,16 +131,5 @@ export const createBuyTransaction = async (hash: string) => {
     nt,
     [],
   ).setMaxFeeForAggregate(100, 1);
-
-  setTransaction(aggTx2);
-  const signedTransaction = await requestSignWithCosignatories([
-    exchangeAccount,
-  ]);
-  const result = await txRepo.announce(signedTransaction).toPromise();
-  return result;
-};
-
-type Order = {
-  buyMosaicId: string;
-  buyMosaicAmount: number;
+  return aggTx2.serialize();
 };

@@ -7,5 +7,15 @@ export type SellTransaction = {
 };
 
 export type BuyTransaction = {
+  payload: string;
+};
+
+export type AggTransaction = {
   hash: string;
+  publicKey: string;
+};
+
+export type Order = {
+  buyMosaicId: string;
+  buyMosaicAmount: number;
 };
