@@ -31,9 +31,9 @@ export class AppController {
     @Body() buyTransaction: BuyTransaction,
   ) {
     try {
-      const result = await this.appService.createCosignatureTransaction(
-        buyTransaction.payload,
-      );
+      const result = await this.appService.createCosignatureTransaction({
+        payload: buyTransaction.payload,
+      });
       return result;
     } catch (e: any) {
       throw new Error(e.message);

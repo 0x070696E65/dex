@@ -21,12 +21,14 @@
     "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11.10.0",
     "@mui/material": "^5.10.2",
+    "@mui/x-data-grid": "^5.15.3",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/typeorm": "^9.0.1",
     "axios": "^0.27.2",
+    "formik": "^2.2.9",
     "js-sha3": "^0.8.0",
     "material-ui": "^0.20.2",
     "nest-next": "^10.0.0",
@@ -38,7 +40,8 @@
     "rimraf": "^3.0.2",
     "rxjs": "^7.5.6",
     "sss-module": "^1.0.4",
-    "symbol-sdk": "2.0.0"
+    "symbol-sdk": "2.0.0",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",

@@ -1,7 +1,6 @@
 import {
   RepositoryFactoryHttp,
   Crypto,
-  NetworkType,
   PublicAccount,
   SecretLockTransaction,
   Deadline,
@@ -13,6 +12,11 @@ import {
   PlainMessage,
   AggregateTransaction,
   AggregateTransactionCosignature,
+  SecretProofTransaction,
+  TransactionGroup,
+  TransactionType,
+  TransactionSearchCriteria,
+  AggregateTransactionInfo,
 } from 'symbol-sdk';
 import {
   requestSignEncription,
@@ -22,21 +26,112 @@ import {
 } from 'sss-module';
 import { sha3_256 } from 'js-sha3';
 import { apiClient } from 'src/shared/lib/apiClient';
-import { BuyTransaction, AggTransaction } from '../types';
-const node = 'https://hideyoshi.mydns.jp:3001';
+import { mosaicList } from 'src/shared/lib/mosaicList';
+import { BuyTransaction, AggTransaction, List, Order } from '../types';
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const nt = Number(process.env.NEXT_PUBLIC_NETWORK_TYPE!);
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const ea = Number(process.env.NEXT_PUBLIC_EPOC_ADJUSTMENT!);
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const node = process.env.NEXT_PUBLIC_NODE_URL!;
 const repo = new RepositoryFactoryHttp(node);
 const txRepo = repo.createTransactionRepository();
-const ea = 1637848847;
-const ng = '7FCCD304802016BEBBCD342A332F91FF1F3BB5E902988B352697BE245F48E836';
-const nt = NetworkType.TEST_NET;
-
-const exchangePubkey =
-  '63F391849CE99ACF97DBB5388323520CC8C7E3CCB4A739FF0F699DB3FAA991D7'; //process.env.EXCHANGE_PUBKEY;
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const exchangePubkey = process.env.NEXT_PUBLIC_EXCHANGE_PUBKEY!;
 const exchangePublicAccount = PublicAccount.createFromPublicKey(
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   exchangePubkey!,
   nt,
 );
+
+const getArraysDiff = (
+  array1: SecretLockTransaction[],
+  array2: SecretProofTransaction[],
+) => {
+  const array1SecretArray = array1.map((itm) => {
+    return itm.secret;
+  });
+  const array2SecretArray = array2.map((itm) => {
+    return itm.secret;
+  });
+  // label のみの配列で比較
+  const arr1 = [...new Set(array1SecretArray)];
+  const arr2 = [...new Set(array2SecretArray)];
+  return [...arr1, ...arr2].filter((val) => {
+    return !arr1.includes(val) || !arr2.includes(val);
+  });
+};
+const GetDatas = async () => {
+  const transactionSearchCriteriaLock: TransactionSearchCriteria = {
+    group: TransactionGroup.Confirmed,
+    type: [TransactionType.SECRET_LOCK],
+    embedded: true,
+    pageSize: 100,
+    recipientAddress: exchangePublicAccount.address,
+  };
+  const resultLock = await txRepo
+    .search(transactionSearchCriteriaLock)
+    .toPromise();
+  const transactionSearchCriteriaProof: TransactionSearchCriteria = {
+    group: TransactionGroup.Confirmed,
+    type: [TransactionType.SECRET_PROOF],
+    embedded: true,
+    pageSize: 100,
+    recipientAddress: exchangePublicAccount.address,
+  };
+  const resultProof = await txRepo
+    .search(transactionSearchCriteriaProof)
+    .toPromise();
+  const ChateuDiff = getArraysDiff(
+    resultLock?.data as SecretLockTransaction[],
+    resultProof?.data as SecretProofTransaction[],
+  );
+  const enferChateuDiff = (resultLock?.data as SecretLockTransaction[]).filter(
+    (item) => {
+      return ChateuDiff.includes(item.secret);
+    },
+  );
+  const result: List[] = [];
+  for (let i = 0; i < enferChateuDiff.length; i++) {
+    const aggHash = (
+      enferChateuDiff[i].transactionInfo as AggregateTransactionInfo
+    ).aggregateHash;
+
+    const tx2 = await txRepo
+      .getTransaction(aggHash, TransactionGroup.Confirmed)
+      .toPromise();
+    const order: Order = JSON.parse(
+      (
+        (tx2 as AggregateTransaction)
+          .innerTransactions[2] as TransferTransaction
+      ).message.payload,
+    );
+    const sellMosaicId = enferChateuDiff[i].mosaic.id.toHex();
+    const sellMosaicName = mosaicList.find((mosaic) => {
+      return mosaic.mosaicId == sellMosaicId;
+    })?.mosaicName;
+    const buyMosaicId = order.buyMosaicId;
+    const buyMosaicName = mosaicList.find((mosaic) => {
+      return mosaic.mosaicId == buyMosaicId;
+    })?.mosaicName;
+    if (sellMosaicName == undefined || buyMosaicName == undefined)
+      throw new Error('');
+    const publicKey = enferChateuDiff[i].signer?.publicKey;
+    if (publicKey == undefined) throw new Error('');
+    const data: List = {
+      id: aggHash,
+      sellerPublicKey: publicKey,
+      sellMosaicId,
+      sellMosaicName,
+      sellMosaicAmount: enferChateuDiff[i].mosaic.amount.compact(),
+      buyMosaicId,
+      buyMosaicAmount: order.buyMosaicAmount,
+      buyMosaicName,
+    };
+    result.push(data);
+  }
+  return result;
+};
 
 const createSellTransaction = async (
   sellerPublicKey: string,
@@ -150,4 +245,4 @@ const createBuyTransaction = async (hash: string, publicKey: string) => {
   return result;
 };
 
-export default { createSellTransaction, createBuyTransaction };
+export default { createSellTransaction, createBuyTransaction, GetDatas };

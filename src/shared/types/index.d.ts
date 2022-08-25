@@ -19,3 +19,20 @@ export type Order = {
   buyMosaicId: string;
   buyMosaicAmount: number;
 };
+
+export type List = {
+  id: string;
+  sellerPublicKey: string;
+  sellMosaicId: string;
+  sellMosaicName: string;
+  sellMosaicAmount: number;
+  buyMosaicId: string;
+  buyMosaicAmount: number;
+  buyMosaicName: string;
+};
+
+export type Mosaic = {
+  mosaicId: string;
+  mosaicName: string;
+  divisibility: number;
+};
