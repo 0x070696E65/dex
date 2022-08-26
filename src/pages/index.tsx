@@ -65,7 +65,10 @@ const Home: NextPage = () => {
     const m = mosaics.find((mosaic) => {
       return event.row.buyMosaicName == mosaic.mosaicName;
     });
-    if (m?.mosaicAmount == undefined) return;
+    if (m?.mosaicAmount == undefined) {
+      alert('必要なモザイクを所持していません');
+      return;
+    }
     if (m?.mosaicAmount < event.row.buyMosaicAmount) {
       alert('必要なモザイクの数量を所持していません');
     } else {
