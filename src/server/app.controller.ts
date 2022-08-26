@@ -39,4 +39,14 @@ export class AppController {
       throw new Error(e.message);
     }
   }
+
+  @Get('/api/watch')
+  public async watchTransaction() {
+    try {
+      const result = await this.appService.watchTransaction();
+      return result;
+    } catch (e: any) {
+      throw new Error(e.message);
+    }
+  }
 }

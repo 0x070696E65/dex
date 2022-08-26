@@ -7,7 +7,7 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import NewOrderModal from '../components/NewOrderModal';
 import OrderModal from '../components/OrderModal';
 import { getActiveAddress, isAllowedSSS } from 'sss-module';
-import { Address } from 'symbol-sdk';
+import { apiClient } from '../shared/lib/apiClient';
 
 const Home: NextPage = () => {
   const columns: GridColDef[] = [
@@ -58,6 +58,11 @@ const Home: NextPage = () => {
         console.log(result);
         setDatas(result);
       });
+      const watch = await apiClient.get('/api/watch');
+      console.log(watch.data);
+      if (watch.data == 'reload') {
+        init();
+      }
     };
     init();
   }, []);

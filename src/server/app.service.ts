@@ -19,6 +19,7 @@ import {
   PlainMessage,
 } from 'symbol-sdk';
 import { Order } from '../shared/types';
+
 @Injectable()
 export class AppService {
   createCosignatureTransaction({
@@ -145,5 +146,37 @@ export class AppService {
       [],
     ).setMaxFeeForAggregate(100, 1);
     return aggTx2.serialize();
+  }
+  async watchTransaction() {
+    return new Promise(function (resolve, reject) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const node = process.env.NEXT_PUBLIC_NODE_URL!;
+      const repo = new RepositoryFactoryHttp(node);
+      const listener = repo.createListener();
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const nt = Number(process.env.NETWORK_TYPE!);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const exchangePubkey = process.env.EXCHANGE_PUBKEY!;
+      const exchangePublicAccount = PublicAccount.createFromPublicKey(
+        exchangePubkey,
+        nt,
+      );
+      try {
+        listener
+          .open()
+          .then(async () => {
+            listener.newBlock();
+            listener.confirmed(exchangePublicAccount.address).subscribe(() => {
+              resolve('reload');
+            });
+          })
+          .catch((e: any) => {
+            reject(e.message);
+          });
+      } catch (e: any) {
+        listener.close();
+        return e.message;
+      }
+    });
   }
 }
