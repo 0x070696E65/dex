@@ -14,8 +14,8 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
-import { List } from '../../shared/types';
-import sym from '../../shared/lib/symbol';
+import type { List } from '../shared/types';
+import sym from '../shared/lib/symbol';
 import { getActivePublicKey } from 'sss-module';
 export default function OrderModal(props: any) {
   const handleClose = () => props.setShowModal(false);

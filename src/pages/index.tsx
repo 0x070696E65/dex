@@ -4,8 +4,8 @@ import sym from '../shared/lib/symbol';
 import { useState, useEffect } from 'react';
 import { HaveMosaic, List } from '../shared/types';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import NewOrderModal from './components/NewOrderModal';
-import OrderModal from './components/OrderModal';
+import NewOrderModal from '../components/NewOrderModal';
+import OrderModal from '../components/OrderModal';
 import { getActiveAddress, isAllowedSSS } from 'sss-module';
 
 const Home: NextPage = () => {
@@ -62,8 +62,16 @@ const Home: NextPage = () => {
   }, []);
 
   const cellClickHandler = (event: any) => {
-    setShowModal(true);
-    setOrder(event.row);
+    const m = mosaics.find((mosaic) => {
+      return event.row.buyMosaicName == mosaic.mosaicName;
+    });
+    if (m?.mosaicAmount == undefined) return;
+    if (m?.mosaicAmount < event.row.buyMosaicAmount) {
+      alert('必要なモザイクの数量を所持していません');
+    } else {
+      setShowModal(true);
+      setOrder(event.row);
+    }
   };
   return (
     <Box>

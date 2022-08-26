@@ -1,6 +1,6 @@
 import { Controller, Get, Render, Body, Post } from '@nestjs/common';
 import { AppService } from './app.service';
-import { BuyTransaction, AggTransaction } from '../shared/types';
+import type { BuyTransaction, AggTransaction } from '../shared/types';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
@@ -31,7 +31,7 @@ export class AppController {
     @Body() buyTransaction: BuyTransaction,
   ) {
     try {
-      const result = await this.appService.createCosignatureTransaction({
+      const result = this.appService.createCosignatureTransaction({
         payload: buyTransaction.payload,
       });
       return result;

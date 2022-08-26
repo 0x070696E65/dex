@@ -2,7 +2,7 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { getActivePublicKey } from 'sss-module';
-import sym from '../../shared/lib/symbol';
+import sym from '../shared/lib/symbol';
 import {
   FormControl,
   Typography,
