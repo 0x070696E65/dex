@@ -160,10 +160,10 @@ const GetDatas = async () => {
 
 const createSellTransaction = async (
   sellerPublicKey: string,
-  buyMosaicId: string,
-  buyMosaicAmount: number,
   sellMosaicId: string,
   sellMosaicAmount: number,
+  buyMosaicId: string,
+  buyMosaicAmount: number,
 ) => {
   try {
     const random = Crypto.randomBytes(20);
