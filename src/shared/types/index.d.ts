@@ -36,3 +36,9 @@ export type Mosaic = {
   mosaicName: string;
   divisibility: number;
 };
+
+export type HaveMosaic = {
+  id: string;
+  mosaicName: string;
+  mosaicAmount: number;
+};

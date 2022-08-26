@@ -17,6 +17,7 @@ import {
   TransactionType,
   TransactionSearchCriteria,
   AggregateTransactionInfo,
+  Address,
 } from 'symbol-sdk';
 import {
   requestSignEncription,
@@ -25,9 +26,15 @@ import {
   setMessage,
 } from 'sss-module';
 import { sha3_256 } from 'js-sha3';
-import { apiClient } from 'src/shared/lib/apiClient';
-import { mosaicList } from 'src/shared/lib/mosaicList';
-import { BuyTransaction, AggTransaction, List, Order } from '../types';
+import { apiClient } from './apiClient';
+import { mosaicList } from './mosaicList';
+import {
+  BuyTransaction,
+  AggTransaction,
+  List,
+  Order,
+  HaveMosaic,
+} from '../types';
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const nt = Number(process.env.NEXT_PUBLIC_NETWORK_TYPE!);
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -36,6 +43,7 @@ const ea = Number(process.env.NEXT_PUBLIC_EPOC_ADJUSTMENT!);
 const node = process.env.NEXT_PUBLIC_NODE_URL!;
 const repo = new RepositoryFactoryHttp(node);
 const txRepo = repo.createTransactionRepository();
+const accRepo = repo.createAccountRepository();
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const exchangePubkey = process.env.NEXT_PUBLIC_EXCHANGE_PUBKEY!;
 const exchangePublicAccount = PublicAccount.createFromPublicKey(
@@ -43,7 +51,25 @@ const exchangePublicAccount = PublicAccount.createFromPublicKey(
   exchangePubkey!,
   nt,
 );
-
+const GetMosaics = async (rawAddress: string) => {
+  const address = Address.createFromRawAddress(rawAddress);
+  const accInfo = await accRepo.getAccountInfo(address).toPromise();
+  const haveMosaicList: HaveMosaic[] = [];
+  if (accInfo?.mosaics == undefined) return;
+  for (let i = 0; i < accInfo.mosaics.length; i++) {
+    const mosaic = mosaicList.find((m) => {
+      return m.mosaicId == accInfo.mosaics[i].id.toHex();
+    });
+    if (mosaic == undefined) continue;
+    const haveMosaic: HaveMosaic = {
+      id: mosaic.mosaicId,
+      mosaicName: mosaic.mosaicName,
+      mosaicAmount: accInfo.mosaics[i].amount.compact(),
+    };
+    haveMosaicList.push(haveMosaic);
+  }
+  return haveMosaicList;
+};
 const getArraysDiff = (
   array1: SecretLockTransaction[],
   array2: SecretProofTransaction[],
@@ -54,7 +80,6 @@ const getArraysDiff = (
   const array2SecretArray = array2.map((itm) => {
     return itm.secret;
   });
-  // label のみの配列で比較
   const arr1 = [...new Set(array1SecretArray)];
   const arr2 = [...new Set(array2SecretArray)];
   return [...arr1, ...arr2].filter((val) => {
@@ -245,4 +270,9 @@ const createBuyTransaction = async (hash: string, publicKey: string) => {
   return result;
 };
 
-export default { createSellTransaction, createBuyTransaction, GetDatas };
+export default {
+  createSellTransaction,
+  createBuyTransaction,
+  GetDatas,
+  GetMosaics,
+};

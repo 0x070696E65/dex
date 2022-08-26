@@ -57,7 +57,6 @@ export class AppService {
     const txRepo = repo.createTransactionRepository();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const exchangePubkey = process.env.EXCHANGE_PUBKEY!;
-    console.log(exchangePubkey);
     const exchangePublicAccount = PublicAccount.createFromPublicKey(
       exchangePubkey,
       nt,

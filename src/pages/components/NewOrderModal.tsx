@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { Formik } from 'formik';
 import { mosaicList } from 'src/shared/lib/mosaicList';
+import { Mosaic, HaveMosaic } from 'src/shared/types';
 const style = {
   position: 'absolute',
   top: '50%',
@@ -25,12 +26,40 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
-
-export default function NewOrderModal() {
+const getArraysAnd = (array1: Mosaic[], array2: HaveMosaic[]) => {
+  const array1Array = array1.map((itm) => {
+    return itm.mosaicId;
+  });
+  const array2Array = array2.map((itm) => {
+    return itm.id;
+  });
+  const arr1 = [...new Set(array1Array)];
+  const arr2 = [...new Set(array2Array)];
+  return [...arr1, ...arr2].filter((val) => {
+    return arr1.includes(val) && arr2.includes(val);
+  });
+};
+export default function NewOrderModal(props: any) {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const mosaicListData = mosaicList.map((mosaic) => (
+  const haveMosaic: HaveMosaic[] = props.mosaics;
+  const ChateuDiff = getArraysAnd(mosaicList, haveMosaic);
+  const enferChateuDiff = haveMosaic.filter((item) => {
+    return ChateuDiff.includes(item.id);
+  });
+  const checkMaxAmount = (mosaicName: string) => {
+    const max = haveMosaic.find((mosaic) => {
+      return mosaic.mosaicName == mosaicName;
+    })?.mosaicAmount;
+    return max;
+  };
+  const mosaicSellListData = enferChateuDiff.map((mosaic) => (
+    <MenuItem key={mosaic.mosaicName} value={mosaic.mosaicName}>
+      {mosaic.mosaicName}
+    </MenuItem>
+  ));
+  const mosaicBuyListData = mosaicList.map((mosaic) => (
     <MenuItem key={mosaic.mosaicName} value={mosaic.mosaicName}>
       {mosaic.mosaicName}
     </MenuItem>
@@ -59,7 +88,7 @@ export default function NewOrderModal() {
     handleClose();
   };
   return (
-    <Box style={{ margin: '50px 0' }}>
+    <Box>
       <Button
         onClick={handleOpen}
         style={{ width: '500px' }}
@@ -90,9 +119,9 @@ export default function NewOrderModal() {
           <Formik
             initialValues={{
               sellMosaicName: '',
-              sellMosaicAmount: 0,
+              sellMosaicAmount: 1,
               buyMosaicName: '',
-              buyMosaicAmount: 0,
+              buyMosaicAmount: 1,
             }}
             onSubmit={(values) => {
               CreateSellTransaction(
@@ -116,7 +145,7 @@ export default function NewOrderModal() {
                     value={props.values.sellMosaicName}
                     onChange={props.handleChange}
                   >
-                    {mosaicListData}
+                    {mosaicSellListData}
                   </Select>
                 </FormControl>
                 <FormControl style={{ width: '28%', marginLeft: '2%' }}>
@@ -128,6 +157,12 @@ export default function NewOrderModal() {
                     type={'number'}
                     value={props.values.sellMosaicAmount}
                     onChange={props.handleChange}
+                    InputProps={{
+                      inputProps: {
+                        min: 1,
+                        max: checkMaxAmount(props.values.sellMosaicName),
+                      },
+                    }}
                   />
                 </FormControl>
                 <FormControl style={{ width: '70%', marginTop: '30px' }}>
@@ -142,7 +177,7 @@ export default function NewOrderModal() {
                     value={props.values.buyMosaicName}
                     onChange={props.handleChange}
                   >
-                    {mosaicListData}
+                    {mosaicBuyListData}
                   </Select>
                 </FormControl>
                 <FormControl
@@ -156,6 +191,7 @@ export default function NewOrderModal() {
                     type={'number'}
                     value={props.values.buyMosaicAmount}
                     onChange={props.handleChange}
+                    InputProps={{ inputProps: { min: 1 } }}
                   />
                 </FormControl>
                 <Button
@@ -164,7 +200,7 @@ export default function NewOrderModal() {
                   variant="contained"
                   color="success"
                 >
-                  送信
+                  署名
                 </Button>
                 <Button
                   type="submit"

@@ -1,17 +1,8 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import {
-  FormControl,
-  Typography,
-  InputLabel,
-  Modal,
-  Select,
-  MenuItem,
-  TextField,
-} from '@mui/material';
+import { FormControl, Typography, Modal, TextField } from '@mui/material';
 import { Formik } from 'formik';
-import { mosaicList } from 'src/shared/lib/mosaicList';
 const style = {
   position: 'absolute',
   top: '50%',
@@ -24,10 +15,9 @@ const style = {
   p: 4,
 };
 import { List } from '../../shared/types';
-
+import sym from '../../shared/lib/symbol';
+import { getActivePublicKey } from 'sss-module';
 export default function OrderModal(props: any) {
-  const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
   const handleClose = () => props.setShowModal(false);
   const list: List = props.order;
   return (
@@ -58,7 +48,14 @@ export default function OrderModal(props: any) {
               buyMosaicName: '',
               buyMosaicAmount: 0,
             }}
-            onSubmit={(values) => console.log(values)}
+            onSubmit={async () => {
+              const result = await sym.createBuyTransaction(
+                list.id,
+                getActivePublicKey(),
+              );
+              console.log(result);
+              handleClose();
+            }}
           >
             {(props: any) => (
               <form onSubmit={props.handleSubmit}>
@@ -114,7 +111,7 @@ export default function OrderModal(props: any) {
                   variant="contained"
                   color="success"
                 >
-                  取引
+                  署名
                 </Button>
                 <Button
                   type="submit"
