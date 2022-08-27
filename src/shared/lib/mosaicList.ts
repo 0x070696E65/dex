@@ -22,6 +22,11 @@ export const mosaicList: Mosaic[] = [
     divisibility: 0,
   },
   {
+    mosaicId: '22EB02FCBC661527',
+    mosaicName: 'nononon.tomato',
+    divisibility: 0,
+  },
+  {
     mosaicId: '613E6D0FC11F4530',
     mosaicName: 'toshi.tomato',
     divisibility: 0,
