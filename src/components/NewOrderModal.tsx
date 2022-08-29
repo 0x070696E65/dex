@@ -41,6 +41,7 @@ const getArraysAnd = (array1: Mosaic[], array2: HaveMosaic[]) => {
 };
 export default function NewOrderModal(props: any) {
   const [open, setOpen] = React.useState(false);
+  const [chekedMosaicList, setchekedMosaicList] = React.useState<Mosaic[]>([]);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const haveMosaic: HaveMosaic[] = props.mosaics;
@@ -48,6 +49,21 @@ export default function NewOrderModal(props: any) {
   const enferChateuDiff = haveMosaic.filter((item) => {
     return ChateuDiff.includes(item.id);
   });
+  React.useEffect(() => {
+    const checkRestrictionList = async (): Promise<void> => {
+      const isRestriction = await sym.CheckRestriction(getActivePublicKey());
+      console.log(isRestriction);
+      if (!isRestriction) {
+        const copy = mosaicList.filter((m) => {
+          return m.mosaicId != '613E6D0FC11F4530';
+        });
+        setchekedMosaicList(copy);
+      } else {
+        setchekedMosaicList(mosaicList);
+      }
+    };
+    setTimeout(() => checkRestrictionList(), 1000);
+  }, []);
   const checkMaxAmount = (mosaicName: string) => {
     const max = haveMosaic.find((mosaic) => {
       return mosaic.mosaicName == mosaicName;
@@ -59,7 +75,7 @@ export default function NewOrderModal(props: any) {
       {mosaic.mosaicName}
     </MenuItem>
   ));
-  const mosaicBuyListData = mosaicList.map((mosaic) => (
+  const mosaicBuyListData = chekedMosaicList.map((mosaic) => (
     <MenuItem key={mosaic.mosaicName} value={mosaic.mosaicName}>
       {mosaic.mosaicName}
     </MenuItem>

@@ -1,4 +1,4 @@
-import { Controller, Get, Render, Body, Post } from '@nestjs/common';
+import { Controller, Get, Render, Body, Post, Redirect } from '@nestjs/common';
 import { AppService } from './app.service';
 import type { BuyTransaction, AggTransaction } from '../shared/types';
 @Controller()

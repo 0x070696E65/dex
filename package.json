@@ -20,6 +20,7 @@
   "dependencies": {
     "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11.10.0",
+    "@kittgen/nestjs-https-redirect": "^1.0.2",
     "@mui/material": "^5.10.2",
     "@mui/x-data-grid": "^5.15.3",
     "@nestjs/common": "^9.0.0",

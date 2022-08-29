@@ -175,6 +175,13 @@ const Home: NextPage = () => {
                 </li>
                 <li>※0.1XYM前後の手数料がかかります。</li>
                 <li>
+                  toshi.tomatoについては認証を受けていなければ送受信ができません。
+                  <br />
+                  <a href="https://tomatina.herokuapp.com/" target={'_blank'}>
+                    詳細はこちらから
+                  </a>
+                </li>
+                <li>
                   本交換所で発生したトラブルは一切責任を負いません。あくまでもモザイク遊びの一環として活用ください
                 </li>
                 <li>

@@ -18,6 +18,8 @@ import {
   TransactionSearchCriteria,
   AggregateTransactionInfo,
   Address,
+  NetworkType,
+  KeyGenerator,
 } from 'symbol-sdk';
 import {
   requestSignEncription,
@@ -44,6 +46,7 @@ const node = process.env.NEXT_PUBLIC_NODE_URL!;
 const repo = new RepositoryFactoryHttp(node);
 const txRepo = repo.createTransactionRepository();
 const accRepo = repo.createAccountRepository();
+const restrictionHttp = repo.createRestrictionMosaicRepository();
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const exchangePubkey = process.env.NEXT_PUBLIC_EXCHANGE_PUBKEY!;
 const exchangePublicAccount = PublicAccount.createFromPublicKey(
@@ -51,6 +54,29 @@ const exchangePublicAccount = PublicAccount.createFromPublicKey(
   exchangePubkey!,
   nt,
 );
+const CheckRestriction = async (pubKey: string): Promise<boolean> => {
+  const query = {
+    targetAddress: PublicAccount.createFromPublicKey(
+      pubKey,
+      NetworkType.MAIN_NET,
+    ).address,
+  };
+  const res = await restrictionHttp.search(query).toPromise();
+  if (res == undefined) return false;
+  if (res.data.length == 0) return false;
+
+  for (let i = 0; i < res.data[0].restrictions.length; i++) {
+    if (
+      res.data[0].restrictions[i].key.toHex() ==
+        KeyGenerator.generateUInt64Key('TOMATO').toHex() &&
+      res.data[0].restrictions[i].restrictionValue.toHex() ==
+        UInt64.fromUint(1).toHex()
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
 const GetMosaics = async (rawAddress: string) => {
   const address = Address.createFromRawAddress(rawAddress);
   const accInfo = await accRepo.getAccountInfo(address).toPromise();
@@ -275,4 +301,5 @@ export default {
   createBuyTransaction,
   GetDatas,
   GetMosaics,
+  CheckRestriction,
 };
