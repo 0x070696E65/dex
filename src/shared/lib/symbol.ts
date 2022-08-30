@@ -37,14 +37,27 @@ import {
   Order,
   HaveMosaic,
 } from '../types';
+
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const nt = Number(process.env.NEXT_PUBLIC_NETWORK_TYPE!);
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const ea = Number(process.env.NEXT_PUBLIC_EPOC_ADJUSTMENT!);
+const NODES = [
+  'https://hideyoshi-node.net:3001',
+  'https://sym-main-05.opening-line.jp:3001',
+  'https://sym-main-03.opening-line.jp:3001',
+  'https://sym-main.opening-line.jp:3001',
+  'https://sym-main-01.opening-line.jp:3001',
+  'https://sym-main-08.opening-line.jp:3001',
+  'https://sym-main-07.opening-line.jp:3001',
+  'https://sym-main-02.opening-line.jp:3001',
+];
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const node = process.env.NEXT_PUBLIC_NODE_URL!;
+const node = NODES[Math.floor(Math.random() * NODES.length)];
+console.log(node);
 const repo = new RepositoryFactoryHttp(node);
 const txRepo = repo.createTransactionRepository();
+const chainRepo = repo.createChainRepository();
 const accRepo = repo.createAccountRepository();
 const restrictionHttp = repo.createRestrictionMosaicRepository();
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -112,36 +125,77 @@ const getArraysDiff = (
     return !arr1.includes(val) || !arr2.includes(val);
   });
 };
-const GetDatas = async () => {
-  const transactionSearchCriteriaLock: TransactionSearchCriteria = {
-    group: TransactionGroup.Confirmed,
-    type: [TransactionType.SECRET_LOCK],
-    embedded: true,
-    pageSize: 100,
-    recipientAddress: exchangePublicAccount.address,
-  };
-  const resultLock = await txRepo
-    .search(transactionSearchCriteriaLock)
-    .toPromise();
-  const transactionSearchCriteriaProof: TransactionSearchCriteria = {
-    group: TransactionGroup.Confirmed,
-    type: [TransactionType.SECRET_PROOF],
-    embedded: true,
-    pageSize: 100,
-    recipientAddress: exchangePublicAccount.address,
-  };
-  const resultProof = await txRepo
-    .search(transactionSearchCriteriaProof)
-    .toPromise();
-  const ChateuDiff = getArraysDiff(
-    resultLock?.data as SecretLockTransaction[],
-    resultProof?.data as SecretProofTransaction[],
-  );
-  const enferChateuDiff = (resultLock?.data as SecretLockTransaction[]).filter(
-    (item) => {
-      return ChateuDiff.includes(item.secret);
-    },
-  );
+const GetHeight = async () => {
+  const chain = await chainRepo.getChainInfo().toPromise();
+  return chain?.height;
+};
+
+const GetDatas = async (height: UInt64 | undefined) => {
+  const fromHeight =
+    height?.compact() != undefined
+      ? UInt64.fromUint(height?.compact() - 10000)
+      : undefined;
+  let isLockContinue = true;
+  let lockCount = 1;
+  let resultLockArray: SecretLockTransaction[] = [];
+  while (isLockContinue) {
+    const transactionSearchCriteriaLock: TransactionSearchCriteria = {
+      group: TransactionGroup.Confirmed,
+      type: [TransactionType.SECRET_LOCK],
+      embedded: true,
+      pageSize: 100,
+      pageNumber: lockCount,
+      fromHeight,
+      recipientAddress: exchangePublicAccount.address,
+    };
+    const resultLock = await txRepo
+      .search(transactionSearchCriteriaLock)
+      .toPromise();
+    if (resultLock?.data.length == 0) {
+      isLockContinue = false;
+    } else {
+      resultLockArray =
+        lockCount == 1
+          ? (resultLockArray = resultLock?.data as SecretLockTransaction[])
+          : resultLockArray.concat(resultLock?.data as SecretLockTransaction[]);
+    }
+    lockCount++;
+  }
+
+  let isProofContinue = true;
+  let proofCount = 1;
+  let resultProofArray: SecretProofTransaction[] = [];
+  while (isProofContinue) {
+    const transactionSearchCriteriaLock: TransactionSearchCriteria = {
+      group: TransactionGroup.Confirmed,
+      type: [TransactionType.SECRET_PROOF],
+      embedded: true,
+      pageSize: 100,
+      pageNumber: proofCount,
+      fromHeight: fromHeight,
+      recipientAddress: exchangePublicAccount.address,
+    };
+    const resultProof = await txRepo
+      .search(transactionSearchCriteriaLock)
+      .toPromise();
+    if (resultProof?.data.length == 0) {
+      isProofContinue = false;
+    } else {
+      resultProofArray =
+        proofCount == 1
+          ? (resultProofArray = resultProof?.data as SecretProofTransaction[])
+          : resultProofArray.concat(
+              resultProof?.data as SecretProofTransaction[],
+            );
+    }
+    proofCount++;
+  }
+
+  const ChateuDiff = getArraysDiff(resultLockArray, resultProofArray);
+
+  const enferChateuDiff = resultLockArray.filter((item) => {
+    return ChateuDiff.includes(item.secret);
+  });
   const result: List[] = [];
   for (let i = 0; i < enferChateuDiff.length; i++) {
     const aggHash = (
@@ -302,4 +356,5 @@ export default {
   GetDatas,
   GetMosaics,
   CheckRestriction,
+  GetHeight,
 };

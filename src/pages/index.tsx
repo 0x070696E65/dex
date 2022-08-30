@@ -63,8 +63,8 @@ const Home: NextPage = () => {
             console.log(result);
           });
         }
-      }, 1000);
-      sym.GetDatas().then((result) => {
+      }, 2000);
+      sym.GetDatas(await sym.GetHeight()).then((result) => {
         console.log(result);
         setDatas(result);
         setIsLoading(false);
@@ -130,7 +130,7 @@ const Home: NextPage = () => {
               style={{
                 position: 'absolute',
                 left: '49%',
-                top: '60%',
+                top: '300px',
               }}
             />
           ) : (

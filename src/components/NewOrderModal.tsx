@@ -15,6 +15,7 @@ import {
 import { Formik } from 'formik';
 import { mosaicList } from 'src/shared/lib/mosaicList';
 import { Mosaic, HaveMosaic } from 'src/shared/types';
+
 const style = {
   position: 'absolute',
   top: '50%',

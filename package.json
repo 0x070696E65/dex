@@ -41,6 +41,7 @@
     "rimraf": "^3.0.2",
     "rxjs": "^7.5.6",
     "sss-module": "^1.0.4",
+    "symbol-node-util": "^1.0.9",
     "symbol-sdk": "2.0.0",
     "use-sound": "^4.0.1",
     "yup": "^0.32.11"
