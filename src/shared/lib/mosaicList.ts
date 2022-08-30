@@ -72,6 +72,16 @@ export const mosaicList: Mosaic[] = [
     divisibility: 0,
   },
   {
+    mosaicId: '4F2DC8BA863044C6',
+    mosaicName: 'fukurou.tomato',
+    divisibility: 0,
+  },
+  {
+    mosaicId: '3F0B0C29CFD04713',
+    mosaicName: 'mtn.tomato',
+    divisibility: 0,
+  },
+  {
     mosaicId: '613E6D0FC11F4530',
     mosaicName: 'toshi.tomato',
     divisibility: 0,
