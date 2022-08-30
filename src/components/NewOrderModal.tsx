@@ -108,7 +108,7 @@ export default function NewOrderModal(props: any) {
       <Button
         onClick={handleOpen}
         style={{ width: '500px' }}
-        variant="outlined"
+        variant="contained"
         color="success"
       >
         新規注文
