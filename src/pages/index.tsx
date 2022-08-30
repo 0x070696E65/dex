@@ -159,8 +159,8 @@ const Home: NextPage = () => {
               <DataGrid
                 rows={mosaics}
                 columns={columnsMosaic}
-                pageSize={5}
-                rowsPerPageOptions={[5]}
+                pageSize={10}
+                rowsPerPageOptions={[10]}
               />
             </Grid>
             <Grid item xs={6}>
