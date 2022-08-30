@@ -56,6 +56,7 @@ const Home: NextPage = () => {
         if (!isAllowedSSS()) {
           alert('SSS Extensionをインストールし有効化してください');
         } else {
+          console.log(`your address is ${getActiveAddress()}`);
           sym.GetMosaics(getActiveAddress()).then((result) => {
             if (result == undefined) return;
             setMosaics(result);
