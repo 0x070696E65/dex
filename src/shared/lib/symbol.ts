@@ -228,7 +228,10 @@ const GetDatas = async (height: UInt64 | undefined) => {
       sellerPublicKey: publicKey,
       sellMosaicId,
       sellMosaicName,
-      sellMosaicAmount: enferChateuDiff[i].mosaic.amount.compact(),
+      sellMosaicAmount: changeAmountFromDivisibility(
+        sellMosaicId,
+        enferChateuDiff[i].mosaic.amount.compact(),
+      ),
       buyMosaicId,
       buyMosaicAmount: order.buyMosaicAmount,
       buyMosaicName,
@@ -236,6 +239,56 @@ const GetDatas = async (height: UInt64 | undefined) => {
     result.push(data);
   }
   return result;
+};
+
+const changeAmountToDivisibility = (mosaicId: string, amount: number) => {
+  const mosaic = mosaicList.find((m) => {
+    return m.mosaicId == mosaicId;
+  });
+  if (mosaic?.divisibility == undefined) return amount;
+  switch (mosaic?.divisibility) {
+    case 0:
+      return amount;
+    case 1:
+      return amount * 10;
+    case 2:
+      return amount * 100;
+    case 3:
+      return amount * 1000;
+    case 4:
+      return amount * 10000;
+    case 5:
+      return amount * 100000;
+    case 6:
+      return amount * 1000000;
+    default:
+      return amount;
+  }
+};
+
+const changeAmountFromDivisibility = (mosaicId: string, amount: number) => {
+  const mosaic = mosaicList.find((m) => {
+    return m.mosaicId == mosaicId;
+  });
+  if (mosaic?.divisibility == undefined) return amount;
+  switch (mosaic?.divisibility) {
+    case 0:
+      return amount;
+    case 1:
+      return amount / 10;
+    case 2:
+      return amount / 100;
+    case 3:
+      return amount / 1000;
+    case 4:
+      return amount / 10000;
+    case 5:
+      return amount / 100000;
+    case 6:
+      return amount / 1000000;
+    default:
+      return amount;
+  }
 };
 
 const createSellTransaction = async (
@@ -264,7 +317,12 @@ const createSellTransaction = async (
 
     const lockTx = SecretLockTransaction.create(
       deadline,
-      new Mosaic(new MosaicId(sellMosaicId), UInt64.fromUint(sellMosaicAmount)),
+      new Mosaic(
+        new MosaicId(sellMosaicId),
+        UInt64.fromUint(
+          changeAmountToDivisibility(sellMosaicId, sellMosaicAmount),
+        ),
+      ),
       UInt64.fromUint(10000),
       LockHashAlgorithm.Op_Sha3_256,
       secret,

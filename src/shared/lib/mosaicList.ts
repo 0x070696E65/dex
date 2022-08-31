@@ -119,12 +119,12 @@ export const mosaicList: Mosaic[] = [
   {
     mosaicId: '6A44EB5C0F8ED639',
     mosaicName: 'klim.tomato',
-    divisibility: 0,
+    divisibility: 1,
   },
   {
     mosaicId: '7ADA0B238BB2E29D',
     mosaicName: 'angelxym.tomato',
-    divisibility: 0,
+    divisibility: 1,
   },
   {
     mosaicId: '613E6D0FC11F4530',

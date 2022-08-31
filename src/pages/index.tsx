@@ -72,6 +72,7 @@ const Home: NextPage = () => {
       const watch = await apiClient.get('/api/watch');
       console.log(watch.data);
       if (watch.data == 'reload') {
+        setDatas([]);
         init();
       }
     };
@@ -130,7 +131,7 @@ const Home: NextPage = () => {
               style={{
                 position: 'absolute',
                 left: '49%',
-                top: '300px',
+                top: '440px',
               }}
             />
           ) : (

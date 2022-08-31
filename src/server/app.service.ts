@@ -19,7 +19,7 @@ import {
   PlainMessage,
 } from 'symbol-sdk';
 import { Order } from '../shared/types';
-
+import { mosaicList } from '../shared/lib/mosaicList';
 @Injectable()
 export class AppService {
   createCosignatureTransaction({
@@ -116,7 +116,9 @@ export class AppService {
 
     const buyMosaic = new Mosaic(
       new MosaicId(order.buyMosaicId),
-      UInt64.fromUint(order.buyMosaicAmount),
+      UInt64.fromUint(
+        changeAmountToDivisibility(order.buyMosaicId, order.buyMosaicAmount),
+      ),
     );
     const returnTx = TransferTransaction.create(
       deadline,
@@ -180,3 +182,28 @@ export class AppService {
     });
   }
 }
+
+const changeAmountToDivisibility = (mosaicId: string, amount: number) => {
+  const mosaic = mosaicList.find((m) => {
+    return m.mosaicId == mosaicId;
+  });
+  if (mosaic?.divisibility == undefined) return amount;
+  switch (mosaic?.divisibility) {
+    case 0:
+      return amount;
+    case 1:
+      return amount * 10;
+    case 2:
+      return amount * 100;
+    case 3:
+      return amount * 1000;
+    case 4:
+      return amount * 10000;
+    case 5:
+      return amount * 100000;
+    case 6:
+      return amount * 1000000;
+    default:
+      return amount;
+  }
+};
