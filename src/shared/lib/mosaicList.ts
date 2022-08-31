@@ -82,6 +82,46 @@ export const mosaicList: Mosaic[] = [
     divisibility: 0,
   },
   {
+    mosaicId: '7B9DC57CC154B2E0',
+    mosaicName: 'hirosansymbol.tomato',
+    divisibility: 0,
+  },
+  {
+    mosaicId: '14ABF8C934D15151',
+    mosaicName: 'cryptobeliever.tomato',
+    divisibility: 0,
+  },
+  {
+    mosaicId: '3898DDE9567D0A34',
+    mosaicName: 'anthony14w.tomato',
+    divisibility: 0,
+  },
+  {
+    mosaicId: '05E545728E183EFA',
+    mosaicName: 'drugn.tomato',
+    divisibility: 0,
+  },
+  {
+    mosaicId: '6BE5318AED3E68DB',
+    mosaicName: 'exym.tomato',
+    divisibility: 0,
+  },
+  {
+    mosaicId: '7542C49F2737C4DE',
+    mosaicName: 'hatchet.tomato',
+    divisibility: 0,
+  },
+  {
+    mosaicId: '078FA8E61BB9BE9C',
+    mosaicName: 'jammin.tomato',
+    divisibility: 0,
+  },
+  {
+    mosaicId: '6A44EB5C0F8ED639',
+    mosaicName: 'klim.tomato',
+    divisibility: 0,
+  },
+  {
     mosaicId: '613E6D0FC11F4530',
     mosaicName: 'toshi.tomato',
     divisibility: 0,
