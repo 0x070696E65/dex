@@ -79,7 +79,7 @@ export const mosaicList: Mosaic[] = [
   {
     mosaicId: '3F0B0C29CFD04713',
     mosaicName: 'mtn.tomato',
-    divisibility: 0,
+    divisibility: 6,
   },
   {
     mosaicId: '7B9DC57CC154B2E0',
