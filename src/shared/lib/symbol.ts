@@ -103,7 +103,10 @@ const GetMosaics = async (rawAddress: string) => {
     const haveMosaic: HaveMosaic = {
       id: mosaic.mosaicId,
       mosaicName: mosaic.mosaicName,
-      mosaicAmount: accInfo.mosaics[i].amount.compact(),
+      mosaicAmount: changeAmountFromDivisibility(
+        mosaic.mosaicId,
+        accInfo.mosaics[i].amount.compact(),
+      ),
     };
     haveMosaicList.push(haveMosaic);
   }
