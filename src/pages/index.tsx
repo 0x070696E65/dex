@@ -9,7 +9,7 @@ import {
 import sym from '../shared/lib/symbol';
 import { useState, useEffect } from 'react';
 import { HaveMosaic, List } from '../shared/types';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridToolbar } from '@mui/x-data-grid';
 import NewOrderModal from '../components/NewOrderModal';
 import OrderModal from '../components/OrderModal';
 import { getActiveAddress, isAllowedSSS } from 'sss-module';
@@ -114,7 +114,7 @@ const Home: NextPage = () => {
           setShowModal={setShowModal}
           order={order}
         />
-        <div style={{ height: 370, width: '100%' }}>
+        <div style={{ height: 600, width: '100%' }}>
           <Grid container spacing={2} style={{ marginBottom: '20px' }}>
             <Grid item xs={8}>
               <Typography variant="h4" component="h4">
@@ -139,9 +139,10 @@ const Home: NextPage = () => {
           <DataGrid
             rows={datas}
             columns={columns}
-            pageSize={5}
-            rowsPerPageOptions={[5]}
+            pageSize={100}
+            rowsPerPageOptions={[100]}
             onCellClick={(event) => cellClickHandler(event)}
+            components={{ Toolbar: GridToolbar }}
           />
         </div>
         <div style={{ height: 700, width: '100%', marginTop: '100px' }}>
